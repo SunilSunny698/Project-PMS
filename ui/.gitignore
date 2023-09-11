@@ -6,3 +6,5 @@
 
 # Ignore a directory named "temp"
 temp/
+
+node_modules/

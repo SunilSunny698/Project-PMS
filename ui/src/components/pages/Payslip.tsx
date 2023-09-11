@@ -26,17 +26,36 @@ const Payslip: React.FC = () => {
   
   const {id} = useParams()
   const headers = {
-    Authorization:`Bearer ${localStorage.getItem("Jwt")}`
+    Authorization:`Bearer ${localStorage.getItem("X-AUTH")}`
   }
+
   const fetchData = async() => {
-    await api.get(`/generateps/${id}`,{headers})
+    await api.get(`employee/generate_payslip/${id}`,{headers})
           .then(response => {
-            if(response.data.deductionsId == null || response.data.bonus ==null){
+            console.log(JSON.stringify(response.data))
+            const responseData = response.data;
+            if(response.data.deduction == null || response.data.earning ==null){
               navigate("/hr/employees?error=true")
             }
             else{
-              setData(response.data)
+              const payslipData = {
+                totalDeductions: responseData.deduction.providentFund + responseData.deduction.tax,
+                netSalary: responseData.basicSalary + responseData.earning.anyAllowances + responseData.earning.bonus - (responseData.deduction.providentFund + responseData.deduction.tax),
+                name: responseData.name,
+                deductionsId: responseData.deduction.id,
+                designation: responseData.designation,
+                any_allowances: responseData.earning.anyAllowances,
+                bonus: responseData.earning.bonus,
+                pf: responseData.deduction.providentFund,
+                basicSalary: responseData.basicSalary,
+                employeeid: responseData.id,
+                tax: responseData.deduction.tax,
+                totalEarnings: responseData.basicSalary + responseData.earning.anyAllowances + responseData.earning.bonus,
+              };
+              setData(payslipData)
             }
+            
+            
           })
           .catch(error => {
             navigate("/hr/employees?error=true")
@@ -139,16 +158,16 @@ const Payslip: React.FC = () => {
                         </tr>
                         <tr className="border-t">
                           <th scope="row" className='px-6 py-4 font-medium text-gray-900 whitespace-nowrap'>Total Earning</th>
-                          <td className='px-6 py-4'>{data.any_allowances + data.bonus}</td>
+                          <td className='px-6 py-4'>{data.totalEarnings}</td>
                           <td className='px-6 py-4 font-medium text-gray-900 whitespace-nowrap'>Total Deductions</td>
-                          <td className='px-6 py-4'> {data.pf+data.tax}</td>
+                          <td className='px-6 py-4'> {data.totalDeductions}</td>
                         </tr>
                       </tbody>
                     </table>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 ml-4 mt-8">
                     <div className="md:col-span-1">
-                        <span className="font-bold text-xl">Net Pay: {(data.basicSalary+data.any_allowances+data.bonus)-(data.pf+data.tax)}</span>
+                        <span className="font-bold text-xl">Net Pay: {data.netSalary}</span>
                     </div>
                     {/* <div className="border md:col-span-1 p-4">
                         <div className="flex flex-col">

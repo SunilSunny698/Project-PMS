@@ -7,7 +7,8 @@ import api from '../api/axiosConfig'
 import { useState } from 'react'
 import { useUserData } from '../Providers/UserDataProvider'
 import { useNavigate } from 'react-router-dom'
-import { UserDataTypes } from '../types/pmsTypes'
+import { toast } from 'react-toastify'
+
 
 
 type LoginTypes = {
@@ -36,34 +37,60 @@ export const Login = () => {
     const onSubmit = async (data: LoginTypes) => {          
         await api.post("/login",JSON.stringify(data))
             .then(response=>{
-                localStorage.setItem("Jwt",response.data.jwt)
+                console.log(response.data)
+                localStorage.setItem("X-AUTH",response.data.jwt)
                 setError(false)
+                
             })
             .catch((error) => {
                 setError(true)
+                toast.error('Invalid Credentials', {
+                    position: "top-right",
+                    autoClose: 2000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "colored",
+                    });
         })
 
         if(!error){
             const headers = {
-                Authorization:`Bearer ${localStorage.getItem("Jwt")}`
+                Authorization:`Bearer ${localStorage.getItem("X-AUTH")}`
             }
-            await api.get("/profile",{headers})
+            await api.get("/employee",{headers})
                 .then(response => {
-                    const responseData: UserDataTypes = response.data
-                    responseData.dateOfBirth = responseData.dateOfBirth.split('T')[0]
-                    responseData.joinDate = responseData.joinDate.split('T')[0]
-                    setUserData(responseData)
-                    sessionStorage.setItem("user",JSON.stringify(responseData))
+                    console.log(response.data)
+                    response.data.dateOfBirth = response.data.dateOfBirth.split('T')[0]
+                    response.data.joinDate = response.data.joinDate.split('T')[0]
+                    setUserData(response.data)
+                    sessionStorage.setItem("user",JSON.stringify(response.data))
+                    toast.success('Login success', {
+                        position: "top-right",
+                        autoClose: 5000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        progress: undefined,
+                        theme: "colored",
+                        });
+                    return response;
+
+                    
+                })
+                .then((response)=>{
                     if(response.data.role==='Employee'){
-                        navigate("/emp")
+                        navigate("/employee")
                     }
                     else{
                         navigate("/hr")
                     }
-                    
                 })
                 .catch(error => {
-                    console.log(error.response)
+                    
                 })
         }
     }

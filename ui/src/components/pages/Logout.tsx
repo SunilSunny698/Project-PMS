@@ -5,7 +5,7 @@ export const Logout = () => {
     const [showLogout,setShowLogout] = useState(true)
     const navigate = useNavigate()
     const OnClickHandler = ()=>{
-        localStorage.removeItem("Jwt")
+        localStorage.removeItem("X-AUTH")
         sessionStorage.removeItem("user")
         navigate("/login")
     }

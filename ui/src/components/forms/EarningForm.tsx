@@ -7,6 +7,7 @@ import {yupResolver} from "@hookform/resolvers/yup"
 import { AlertBox } from '../alerts/AlertBox'
 
 type AddEarningsFormTypes = {
+
     employeeId:string,
     anyAllowances: number,
     bonus: number
@@ -21,7 +22,7 @@ const schema = yup.object().shape({
     bonus: yup.number().required("Bonus field is required").typeError("Invalid value")
 })
 export const EarningForm = ({formType,row}:EarningFormTypes) => {
-
+    console.log(row&&row)
     const [error,setError] = useState(false)
     const [success,setSuccess] = useState(false)
     const [message,setMessage] =useState('')
@@ -30,7 +31,13 @@ export const EarningForm = ({formType,row}:EarningFormTypes) => {
     const {register, formState, handleSubmit} = useForm<AddEarningsFormTypes>
     (
         {
-            defaultValues:row?row:{},
+            defaultValues:
+                        row && 
+                        {
+                            employeeId:row.id,
+                            anyAllowances: row.earning ? row.earning.anyAllowances : null,
+                            bonus: row.earning ? row.earning.bonus : null
+                        },
             resolver: yupResolver(schema)
         }
     )
@@ -38,9 +45,14 @@ export const EarningForm = ({formType,row}:EarningFormTypes) => {
     
     const onSubmit = async (data:AddEarningsFormTypes) => {
         const headers = {            
-            Authorization:`Bearer ${localStorage.getItem("Jwt")}`
+            Authorization:`Bearer ${localStorage.getItem("X-AUTH")}`
         }
-        await api.post("/addempearn",data,{headers})
+        const body = row ? 
+                    {...data,
+                        id:row.earning && row.earning.id
+                    } 
+                    : data 
+        await api.post("/earning",body,{headers})
         .then(() => {
             setSuccess(true)
             setError(false)
@@ -58,6 +70,7 @@ export const EarningForm = ({formType,row}:EarningFormTypes) => {
     return (
         <form className='p-4' onSubmit={handleSubmit(onSubmit)}>
             <AlertBox error={error} success={success} message={message} />
+
             <Input type='text' label='Employee ID' register={{...register("employeeId")}} error={errors.employeeId?.message} />
             <Input type='number' label='Allowances' register={{...register("anyAllowances")}} error={errors.anyAllowances?.message}/>
             <Input type='number' label = 'Bonus' register={{...register("bonus")}} error={errors.bonus?.message} />

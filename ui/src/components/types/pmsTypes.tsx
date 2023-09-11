@@ -1,4 +1,4 @@
-export type Emp = {
+export type Employee = {
     id: string,
     name: string,
     email: string,
@@ -13,8 +13,8 @@ export type Earning = {
 }
 
 export type Deduction = {
-    empId: number,
-    pf: number,
+    employeeId: number,
+    providentFund: number,
     tax: number,
 }
 export type UserDataTypes = {

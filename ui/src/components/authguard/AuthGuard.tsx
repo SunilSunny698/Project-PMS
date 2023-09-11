@@ -2,7 +2,7 @@ import { Navigate, Outlet } from 'react-router-dom';
 
 
 const AuthGuard = () => {
-  const isAuthenticated = localStorage.getItem("Jwt")!=null
+  const isAuthenticated = localStorage.getItem("X-AUTH")!=null
   if (!isAuthenticated) {
     return <Navigate to="/login" />;
   }

@@ -8,7 +8,7 @@ import { AlertBox } from '../alerts/AlertBox'
 
 type AddDeductionFormTypes = {
     employeeId:string,
-    pf: number,
+    providentFund: number,
     tax: number
 }
 type DeductionFormTypes = {
@@ -18,7 +18,7 @@ type DeductionFormTypes = {
 
 const schema = yup.object().shape({
     employeeId: yup.string().required("Employee id is required"),
-    pf: yup.number().required("Pf field is required").typeError("Invalid value"),
+    providentFund: yup.number().required("Pf field is required").typeError("Invalid value"),
     tax: yup.number().required("Tax field is required").typeError("Invalid value"),
 })
 
@@ -32,17 +32,27 @@ export const DeductionForm = ({formType,row}:DeductionFormTypes) => {
     const {register, formState, handleSubmit} = useForm<AddDeductionFormTypes>
     (
         {
-            defaultValues: row?row:{},
+            defaultValues: row && 
+            {
+                employeeId:row.id,
+                providentFund: row.deduction ? row.deduction.providentFund : null,
+                tax: row.deduction ? row.deduction.tax : null
+            },
             resolver: yupResolver(schema)
         }
     )
     const {errors} = formState
     const onSubmit = async (data:AddDeductionFormTypes) => {
-        
+        console.log(data)
         const headers = {            
-            Authorization:`Bearer ${localStorage.getItem("Jwt")}`
+            Authorization:`Bearer ${localStorage.getItem("X-AUTH")}`
         }
-        await api.post("/addempded",data,{headers})
+        const body = row ? 
+                    {...data,
+                        id:row.deduction && row.deduction.id
+                    } 
+                    : data 
+        await api.post("/deduction",body,{headers})
         .then(() => {
             setSuccess(true)
             setError(false)
@@ -62,7 +72,7 @@ export const DeductionForm = ({formType,row}:DeductionFormTypes) => {
     <form className='p-4' onSubmit={handleSubmit(onSubmit)}>
         <AlertBox error={error} success={success} message={message} />
         <Input type='text' label='Employee ID' register={{...register("employeeId")}} error={errors.employeeId?.message} />
-        <Input type='number' label='PF' register={{...register("pf")}} error={errors.pf?.message}/>
+        <Input type='number' label='PF' register={{...register("providentFund")}} error={errors.providentFund?.message}/>
         <Input type='number' label = 'TAX' register={{...register("tax")}} error={errors.tax?.message} />
         <div className="flex items-center p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600">
             <input data-modal-hide="defaultModal" type="submit" className="text-white bg-primary hover:bg-ternary focus:ring-4 focus:outline-none focus:ring-primary font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-ternary" />

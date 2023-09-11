@@ -6,14 +6,16 @@ import { useEffect, useMemo, useState } from "react";
 import { Deduction } from "../types/pmsTypes";
 export const DeductionTable = () => {
     const [data,setData] = useState<Deduction[]>([])
+    const [maxPages, setMaxPages] = useState(0)
     const headers = {          
-      Authorization:`Bearer ${localStorage.getItem("Jwt")}`
+      Authorization:`Bearer ${localStorage.getItem("X-AUTH")}`
     }
-    const fetchData = async () => {
-      await api.get("allded",{headers})
+    const fetchData = async (pageNumber = 0,pageSize = 1) => {
+      await api.get(`deduction?pageNumber=${pageNumber}&pageSize=${pageSize}`,{headers})
       .then(response => {
-        const Data:Deduction[] = response.data
-        setData(Data)
+        console.log("Ded"+JSON.stringify(response.data))
+        setMaxPages(response.data.totalPages-1)
+        setData(response.data.content)
         
       })
       .catch(() => {
@@ -28,7 +30,7 @@ export const DeductionTable = () => {
           {
             header:'Id',
             cell: (row) => row.renderValue(),
-            accessorKey:'employeeId'
+            accessorKey:'id'
           },
           {
             header: 'Name',
@@ -37,20 +39,20 @@ export const DeductionTable = () => {
           },
           {
             header: 'PF',
-            cell: (row) => row.renderValue(),
-            accessorKey: 'pf',
+            cell: (row) => row.renderValue() || 'N/A',
+            accessorKey: 'deduction.providentFund',
           },
           {
             header: 'TAX',
-            cell: (row) => row.renderValue(),
-            accessorKey: 'tax',
+            cell: (row) => row.renderValue() || 'N/A',
+            accessorKey: 'deduction.tax',
           }
           
         ],
         []
        );
     return (
-        <Table  columns={cols} data={data} label="Deduction" view={false} del={false} fetchHandler={fetchData}/>
+        <Table maxPages={maxPages}  columns={cols} data={data} label="Deduction" view={false} del={false} fetchHandler={fetchData}/>
     )
     
        

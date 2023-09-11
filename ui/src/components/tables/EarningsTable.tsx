@@ -7,13 +7,15 @@ import { Earning } from "../types/pmsTypes";
 
 export const EarningsTable = () => {
     const [data,setData] = useState<Earning[]>([])
+    const [maxPages, setMaxPages] = useState(0)
     const headers = {          
-      Authorization:`Bearer ${localStorage.getItem("Jwt")}`
+      Authorization:`Bearer ${localStorage.getItem("X-AUTH")}`
     }
-    const fetchData = async () => {
-      await api.get("allearn",{headers})
+    const fetchData = async (pageNumber = 0,pageSize = 1) => {
+      await api.get(`earning?pageNumber=${pageNumber}&pageSize=${pageSize}`,{headers})
       .then(response => {
-        const Data:Earning[] = response.data
+        const Data:Earning[] = response.data.content
+        setMaxPages(response.data.totalPages-1)
         setData(Data)
         
       })
@@ -28,7 +30,7 @@ export const EarningsTable = () => {
           {
             header:'Id',
             cell: (row) => row.renderValue(),
-            accessorKey:'employeeId'
+            accessorKey:'id'
           },
           {
             header: 'Name',
@@ -37,13 +39,13 @@ export const EarningsTable = () => {
           },
           {
             header: 'Allowances',
-            cell: (row) => row.renderValue(),
-            accessorKey: 'anyAllowances',
+            cell: (row) => row.renderValue() || 'N/A',
+            accessorKey: 'earning.anyAllowances',
           },
           {
             header: 'Bonus',
-            cell: (row) => row.renderValue(),
-            accessorKey: 'bonus',
+            cell: (row) => row.renderValue() || 'N/A',
+            accessorKey: 'earning.bonus',
           }
           
         ],
@@ -51,7 +53,7 @@ export const EarningsTable = () => {
        );
     
     return (
-        <Table columns={cols} data={data} label="Earning" view={false} del={false} fetchHandler={fetchData}/>
+        <Table maxPages={maxPages} columns={cols} data={data} label="Earning" view={false} del={false} fetchHandler={fetchData}/>
     )
     
        

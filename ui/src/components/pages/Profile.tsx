@@ -1,6 +1,7 @@
 import { useUserData } from '../Providers/UserDataProvider'
 export const Profile = () => {
     const {userData} = useUserData()
+    console.log(userData && userData);
     return (
         userData && (
         <div className="container mx-auto mt-[100px] sm:mt-[170px] p-5 sm:pb-[20px] pb-[100px]">

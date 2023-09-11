@@ -19,12 +19,12 @@ const Nav:React.FC = () => {
         
       ]:
       [ 
-        {name:"Dashboard",to:"/emp"},
-        {name:"Employees",to:"/emp/employees"},
-        {name: "Payslip",to:`/emp/employees/${userData && userData.id}`},
+        {name:"Dashboard",to:"/employee"},
+        {name:"Employees",to:"/employee/employees"},
+        {name: "Payslip",to:`/employee/employees/${userData && userData.id}`},
         
       ];
-  const logoutURL = userData.role === 'HR' ? "/hr/logout" : "/emp/logout"
+  const logoutURL = userData.role === 'HR' ? "/hr/logout" : "/employee/logout"
   let [open,setOpen]=useState(false);
   return (
     userData && <>
